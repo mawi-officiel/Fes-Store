@@ -1,4 +1,4 @@
-        class MawiBubbleSystem {
+class MawiBubbleSystem {
             constructor() {
                 this.contextMenu = document.getElementById('mawiContextMenu');
                 this.clipboard = '';
