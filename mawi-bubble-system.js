@@ -1,29 +1,10 @@
-// 2.0.0
+
+// 3.0.0
 // dev. Mawi
 
-// إدراج CSS ديناميكيًا
+// إدراج CSS ديناميكيًا (مبسّط بدون مؤثرات)
 const mawiStyle = document.createElement('style');
 mawiStyle.innerHTML = `
-    .mawi-container {
-        padding: 20px;
-        text-align: center;
-        color: #CBAC52;
-    }
-    .mawi-title {
-        font-size: 2.5em;
-        margin-bottom: 20px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    }
-    .mawi-content {
-        max-width: 800px;
-        margin: 0 auto;
-        line-height: 1.6;
-        padding: 20px;
-        background: rgba(203, 172, 82, 0.1);
-        border-radius: 15px;
-        border: 2px solid #CBAC52;
-        margin-bottom: 40px;
-    }
     .mawi-context-menu {
         position: fixed;
         background: white;
@@ -41,7 +22,7 @@ mawiStyle.innerHTML = `
         color: black;
         cursor: pointer;
         border-bottom: 1px solid rgba(203, 172, 82, 0.3);
-        transition: all 0.3s ease;
+        transition: background 0.3s ease;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -52,7 +33,6 @@ mawiStyle.innerHTML = `
     }
     .mawi-context-item:hover {
         background: rgba(203, 172, 82, 0.15);
-        transform: translateX(-5px);
     }
     .mawi-context-item.mawi-disabled {
         opacity: 0.4;
@@ -61,31 +41,17 @@ mawiStyle.innerHTML = `
     }
     .mawi-context-item.mawi-disabled:hover {
         background: transparent;
-        transform: none;
     }
     .mawi-icon {
         width: 20px;
         height: 20px;
         fill: #CBAC52;
-        transition: fill 0.3s ease;
     }
     .mawi-context-item:hover .mawi-icon {
         fill: #8B7B3A;
     }
     .mawi-context-item.mawi-disabled .mawi-icon {
         fill: #999;
-    }
-    .mawi-ripple {
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(203, 172, 82, 0.3);
-        pointer-events: none;
-        z-index: 999;
-        animation: mawi-ripple-effect 0.6s ease-out;
-    }
-    @keyframes mawi-ripple-effect {
-        0% { transform: scale(0); opacity: 1; }
-        100% { transform: scale(4); opacity: 0; }
     }
 `;
 document.head.appendChild(mawiStyle);
@@ -113,7 +79,7 @@ const mawiHTML = `
 `;
 document.body.insertAdjacentHTML('beforeend', mawiHTML);
 
-// كلاس النظام بدون فقاعات
+// النظام بدون مؤثرات
 class MawiBubbleSystem {
     constructor() {
         this.contextMenu = document.getElementById('mawiContextMenu');
@@ -135,7 +101,6 @@ class MawiBubbleSystem {
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.mawi-context-menu')) {
                 this.hideContextMenu();
-                this.createRipple(e);
             }
         });
         document.addEventListener('scroll', () => this.hideContextMenu());
@@ -143,16 +108,6 @@ class MawiBubbleSystem {
             this.selectedText = window.getSelection().toString();
             this.updateContextMenu();
         });
-    }
-
-    createRipple(event) {
-        const ripple = document.createElement('div');
-        ripple.className = 'mawi-ripple';
-        ripple.style.width = ripple.style.height = '50px';
-        ripple.style.left = (event.clientX - 25) + 'px';
-        ripple.style.top = (event.clientY - 25) + 'px';
-        document.body.appendChild(ripple);
-        setTimeout(() => ripple.remove(), 600);
     }
 
     setupContextMenu() {
@@ -199,26 +154,17 @@ class MawiBubbleSystem {
     copyToClipboard(text) {
         this.clipboard = text;
         if (navigator.clipboard) {
-            navigator.clipboard.writeText(text).then(() => this.showNotification('تم نسخ النص بنجاح!'));
+            navigator.clipboard.writeText(text);
         } else {
-            this.fallbackCopyTextToClipboard(text);
-        }
-    }
-
-    fallbackCopyTextToClipboard(text) {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'fixed';
-        textarea.style.left = '-9999px';
-        document.body.appendChild(textarea);
-        textarea.select();
-        try {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
             document.execCommand('copy');
-            this.showNotification('تم نسخ النص بنجاح!');
-        } catch {
-            this.showNotification('فشل في نسخ النص');
+            textarea.remove();
         }
-        textarea.remove();
     }
 
     pasteFromClipboard() {
@@ -227,34 +173,11 @@ class MawiBubbleSystem {
             const { selectionStart, selectionEnd, value } = active;
             active.value = value.slice(0, selectionStart) + this.clipboard + value.slice(selectionEnd);
             active.selectionStart = active.selectionEnd = selectionStart + this.clipboard.length;
-        } else {
-            this.showNotification('تم لصق النص: ' + this.clipboard);
         }
     }
-
-    showNotification(message) {
-        const note = document.createElement('div');
-        Object.assign(note.style, {
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            background: '#CBAC52',
-            color: '#1a1a1a',
-            padding: '15px 20px',
-            borderRadius: '8px',
-            zIndex: '10001',
-            boxShadow: '0 4px 15px rgba(203, 172, 82, 0.4)',
-            fontWeight: 'bold'
-        });
-        note.textContent = message;
-        document.body.appendChild(note);
-        setTimeout(() => {
-            note.style.opacity = '0';
-            note.style.transform = 'translateY(-20px)';
-            note.style.transition = 'all 0.3s ease';
-            setTimeout(() => note.remove(), 300);
-        }, 3000);
-    }
 }
+
+document.addEventListener('DOMContentLoaded', () => new MawiBubbleSystem());
+
 
 document.addEventListener('DOMContentLoaded', () => new MawiBubbleSystem());
