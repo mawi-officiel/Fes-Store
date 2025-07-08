@@ -1,4 +1,4 @@
-// 1.0.1
+// 2.0.0
 // dev. Mawi
 
 // إدراج CSS ديناميكيًا
@@ -23,33 +23,6 @@ mawiStyle.innerHTML = `
         border-radius: 15px;
         border: 2px solid #CBAC52;
         margin-bottom: 40px;
-    }
-    ::-webkit-scrollbar {
-        width: 12px;
-    }
-    ::-webkit-scrollbar-track {
-        background: #1a1a1a;
-        border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb {
-        background: #CBAC52;
-        border-radius: 10px;
-        border: 2px solid #1a1a1a;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: #e6c866;
-    }
-    .mawi-bubble {
-        position: absolute;
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 1000;
-        animation: mawi-bubble-float 1.5s ease-out forwards;
-    }
-    @keyframes mawi-bubble-float {
-        0% { transform: scale(0) rotate(0deg); opacity: 1; }
-        50% { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
-        100% { transform: scale(0.8) rotate(360deg); opacity: 0; }
     }
     .mawi-context-menu {
         position: fixed;
@@ -140,7 +113,7 @@ const mawiHTML = `
 `;
 document.body.insertAdjacentHTML('beforeend', mawiHTML);
 
-// كلاس النظام
+// كلاس النظام بدون فقاعات
 class MawiBubbleSystem {
     constructor() {
         this.contextMenu = document.getElementById('mawiContextMenu');
@@ -158,51 +131,18 @@ class MawiBubbleSystem {
         document.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             this.showContextMenu(e);
-            this.createBubbles(e);
         });
         document.addEventListener('click', (e) => {
-            if (e.target.closest('.mawi-context-menu')) return;
-            this.hideContextMenu();
-            this.createBubbles(e);
-            this.createRipple(e);
+            if (!e.target.closest('.mawi-context-menu')) {
+                this.hideContextMenu();
+                this.createRipple(e);
+            }
         });
-        document.addEventListener('mousedown', (e) => {
-            if (e.button === 2) this.createBubbles(e);
-        });
-        document.addEventListener('scroll', () => {
-            this.hideContextMenu();
-        });
+        document.addEventListener('scroll', () => this.hideContextMenu());
         document.addEventListener('mouseup', () => {
             this.selectedText = window.getSelection().toString();
             this.updateContextMenu();
         });
-    }
-
-    createBubbles(event) {
-        const count = Math.floor(Math.random() * 8) + 5;
-        for (let i = 0; i < count; i++) {
-            setTimeout(() => this.createSingleBubble(event), i * 50);
-        }
-    }
-
-    createSingleBubble(event) {
-        const bubble = document.createElement('div');
-        bubble.className = 'mawi-bubble';
-        const size = [20, 25, 30, 35, 40, 45][Math.floor(Math.random() * 6)];
-        const colors = ['#CBAC52', 'rgba(203, 172, 82, 0.8)', 'rgba(203, 172, 82, 0.6)', 'rgba(230, 200, 102, 0.8)', 'rgba(255, 215, 0, 0.7)'];
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        const offsetX = (Math.random() - 0.5) * 100;
-        const offsetY = (Math.random() - 0.5) * 100;
-        Object.assign(bubble.style, {
-            width: size + 'px',
-            height: size + 'px',
-            left: (event.clientX + offsetX) + 'px',
-            top: (event.clientY + offsetY) + 'px',
-            background: `radial-gradient(circle at 30% 30%, ${color}, rgba(203, 172, 82, 0.3))`,
-            boxShadow: `0 0 20px ${color}`
-        });
-        document.body.appendChild(bubble);
-        setTimeout(() => bubble.remove(), 1500);
     }
 
     createRipple(event) {
