@@ -1,4 +1,4 @@
-// 1.0.0
+// 1.0.1
 // dev. Mawi
 
 // إدراج CSS ديناميكيًا
@@ -217,11 +217,11 @@ class MawiBubbleSystem {
 
     setupContextMenu() {
         document.getElementById('mawiHomePage').onclick = () => {
-            window.open('https://fes-store.com/', '_blank');
+            window.location.href = 'https://fes-store.com/';
             this.hideContextMenu();
         };
         document.getElementById('mawiCartPage').onclick = () => {
-            window.open('https://fes-store.com/cart', '_blank');
+            window.location.href = 'https://fes-store.com/cart';
             this.hideContextMenu();
         };
         document.getElementById('mawiCopyText').onclick = () => {
